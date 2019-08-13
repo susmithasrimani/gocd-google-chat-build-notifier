@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<go-plugin id="io.github.susmithasrimani.gocd.googleChat" version="1">
+    <about>
+        <name>Google Chat Build Notifier</name>
+        <version>0.1.0</version>
+        <target-go-version>14.4.0</target-go-version>
+        <description>Send build notifications to Google Chat room</description>
+        <vendor>
+            <name>Susmitha</name>
+            <url>www.github.com/susmithasrimani</url>
+        </vendor>
+        <target-os>
+            <value>Linux</value>
+            <value>Windows</value>
+            <value>Mac OS X</value>
+        </target-os>
+    </about>
+</go-plugin>

@@ -7,9 +7,6 @@
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
     id("org.jetbrains.kotlin.jvm").version("1.3.31")
-
-    // Apply the application plugin to add support for building a CLI application.
-    application
 }
 
 repositories {
@@ -27,9 +24,18 @@ dependencies {
 
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+
+    compile("cd.go.plugin:go-plugin-api:19.7.0")
 }
 
-application {
-    // Define the main class for the application
-    mainClassName = "io.github.susmithasrimani.gocd.googleChat.AppKt"
+// task to create a uber/fat jar with plguin code and all it's dependencies
+tasks.register<Jar>("uberJar") {
+    archiveClassifier.set("uber")
+
+    from(sourceSets.main.get().output)
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    }, file("plugin.xml"))
 }
