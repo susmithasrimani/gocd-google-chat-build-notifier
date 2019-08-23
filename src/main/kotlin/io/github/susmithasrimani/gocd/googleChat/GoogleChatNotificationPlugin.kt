@@ -8,20 +8,22 @@ import com.thoughtworks.go.plugin.api.annotation.Load
 import com.thoughtworks.go.plugin.api.annotation.UnLoad
 import com.thoughtworks.go.plugin.api.exceptions.UnhandledRequestTypeException
 import com.thoughtworks.go.plugin.api.info.PluginContext
+import com.thoughtworks.go.plugin.api.logging.Logger
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse
 
 @Extension
 class GoogleChatNotificationPlugin : GoPlugin {
     private var accessor: GoApplicationAccessor? = null
+    private val logger: Logger? = Logger.getLoggerFor(this.javaClass)
     @Load
     fun onLoad(context: PluginContext) {
-        println("Plugin loaded")
+        logger?.info("Plugin loaded")
     }
 
     @UnLoad
     fun onUnload(context: PluginContext) {
-        println("Plugin unloaded")
+        logger?.info("Plugin unloaded")
     }
 
     // this method is executed once at startup
