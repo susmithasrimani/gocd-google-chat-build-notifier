@@ -2,9 +2,11 @@
 
 [Google Chat](https://chat.google.com) based GoCD build notifier
 
-To use this plugin, download the jar from the releases page
+## Downloading the plugin
 
-Setup and configuration
+To use this plugin, download the plugin jar from the [releases page](https://github.com/susmithasrimani/gocd-google-chat-build-notifier/releases)
+
+## Setup and configuration
 * Place the plugin jar in GoCD server external plugins directory `$GOCD_SERVER_DIRECTORY/plugins/external/`
 * Create a config file for example `gchat_notif.conf` like this:
 ```
