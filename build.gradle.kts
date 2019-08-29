@@ -32,7 +32,7 @@ dependencies {
     compile("com.typesafe:config:1.3.4")
 }
 
-// task to create a uber/fat jar with plguin code and all it's dependencies
+// task to create a uber/fat jar with plugin code and all it's dependencies
 tasks.register<Jar>("uberJar") {
     archiveClassifier.set("uber")
 
