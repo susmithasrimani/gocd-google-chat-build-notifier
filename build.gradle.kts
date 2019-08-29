@@ -25,6 +25,7 @@ dependencies {
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
+    // gocd plugin api
     compile("cd.go.plugin:go-plugin-api:19.7.0")
 
     //lightbend config
