@@ -26,6 +26,9 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
     compile("cd.go.plugin:go-plugin-api:19.7.0")
+
+    //lightbend config
+    compile("com.typesafe:config:1.3.4")
 }
 
 // task to create a uber/fat jar with plguin code and all it's dependencies

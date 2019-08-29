@@ -11,13 +11,24 @@ import com.thoughtworks.go.plugin.api.info.PluginContext
 import com.thoughtworks.go.plugin.api.logging.Logger
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse
+import com.typesafe.config.ConfigFactory
+import java.io.File
 
 @Extension
 class GoogleChatNotificationPlugin : GoPlugin {
+    private val confPathEnvVarName = "GCHAT_NOTIFIER_CONF_PATH"
     private var accessor: GoApplicationAccessor? = null
     private val logger: Logger? = Logger.getLoggerFor(this.javaClass)
     @Load
     fun onLoad(context: PluginContext) {
+        val pathname: String = System.getenv(confPathEnvVarName) ?: throw Exception("$confPathEnvVarName environment variable is not defined")
+        val file = File(pathname)
+
+        val config = ConfigFactory.parseFile(file)
+
+        val webhookUrl = config.getString("webhookUrl")
+        logger?.info("Plugin loaded with $webhookUrl")
+
         logger?.info("Plugin loaded")
     }
 
