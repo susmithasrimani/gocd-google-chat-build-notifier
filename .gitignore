@@ -19,3 +19,6 @@ build/
 *.jar
 
 !gradle-wrapper.jar
+
+# kotlintest files
+.kotlintest/
