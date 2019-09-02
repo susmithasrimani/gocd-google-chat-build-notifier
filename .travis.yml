@@ -1,7 +1,18 @@
 language: java
 jdk:
-  - openjdk10
-  - openjdk11
+- openjdk10
+- openjdk11
 script:
-  - ./gradlew test
-  - ./gradlew build
+- "./gradlew test"
+- "./gradlew build"
+- "./gradlew uberJar"
+
+before_deploy: "mv build/libs/gocd-google-chat-build-notifier-uber.jar build/libs/gocd-google-chat-build-notifier-plugin.jar"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: LE4X9jsDg++FZFS7guEhzCEgKPjh7AaxKk/i3Ec22JpiAmlRWfRbkArCzhWX3/NU3irvdWDhapuTvEthQ33hZZJPzrwZM1ChBLt1gw+wFyU56IUoQpmebBI6hrA1mzpMNyfn6V6/Y2CUBu/h0s0WiGI3biC+0qKw7xoyjnoDpM5Jx7QCI0k047FOf3RZNfGveyhs5EOKyD4ngVZRwvLkGQhXdu+akfwj/63CkhVQCRi5cCHcUmPrrxHU2o2e6m7j9M7J5d7NwiZ/gMhe6PwoGJKVAMW1XVqOjHVa87RTIALAP7hTS/QP9QjwBhwF5L+w1mCuRi1X2V6N//UadzK4AzMCv1k+i9OJpBTZJlI/K2kvrMQ1YWwTvFy4x/X8IchyjJ2qzDmZN6eBKgr3+41DPJTfLbb4a3HmklnEWuKPII3ORjLDVqZPLmPq3oOB9V5fE42Z5e3zgVFzv6vwJWDyW4tO/Ji9cIYoZcUKn0QmjplEFrABAuAJ4Ttj6VL6xEpGNnUJitd8UQFQKTCUfuZXlLI/qzo2ICd2DcJL8UHWAbXBfaNvXeC7D5w5KwmIJn3Az31TcrKZVFHHs+vUQVIHSzwGMt+Fd/xL0vCwLzRKLz8kMgjJtS835ev4rlt2sZv/++a3mBgsKwZLFYAzyViHJI/slMC3i6h0e++TiCRlnkk=
+  file: build/libs/gocd-google-chat-build-notifier-plugin.jar
+  on:
+    tags: true
