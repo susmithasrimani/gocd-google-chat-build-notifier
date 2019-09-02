@@ -1,5 +1,7 @@
 package io.github.susmithasrimani.gocd.googleChat.notificationPlugin
 
+import io.kotlintest.matchers.boolean.shouldBeFalse
+import io.kotlintest.matchers.boolean.shouldBeTrue
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.WordSpec
 import kotlinx.serialization.json.Json
@@ -20,18 +22,15 @@ class StageStatusNotificationTest : WordSpec({
 
     "stageURL" should {
         "return correct URL given server host" {
-            failedPipeline.stageURL("https://dummy-gocd-server.com")
-                    .shouldBe("https://dummy-gocd-server.com/go/pipelines/dummyPipeline/10/" +
-                            "failedStage/15")
+            val expected = "https://dummy-gocd-server.com/go/pipelines/dummyPipeline/10/failedStage/15"
+            failedPipeline.stageURL("https://dummy-gocd-server.com") shouldBe expected
 
         }
     }
 
     "stageID" should {
         "return correct ID" {
-            failedPipeline.stageID()
-                    .shouldBe("dummyPipeline/10/" +
-                            "failedStage/15")
+            failedPipeline.stageID() shouldBe "dummyPipeline/10/failedStage/15"
 
         }
     }
@@ -39,13 +38,13 @@ class StageStatusNotificationTest : WordSpec({
     "stageFailed" When {
         "stage has failed" should {
             "return true" {
-                failedPipeline.stageFailed().shouldBe(true)
+                failedPipeline.stageFailed().shouldBeTrue()
             }
         }
 
         "stage has not failed" should {
             "return false" {
-                successfulPipeline.stageFailed().shouldBe(false)
+                successfulPipeline.stageFailed().shouldBeFalse()
             }
         }
     }
@@ -53,7 +52,7 @@ class StageStatusNotificationTest : WordSpec({
     "failedJobsConsoleLogURLs" When {
         "stage has not failed" should {
             "return an empty map" {
-                successfulPipeline.failedJobsConsoleLogURLs("https://dummy-gocd-server.com").size.shouldBe(0)
+                successfulPipeline.failedJobsConsoleLogURLs("https://dummy-gocd-server.com").size shouldBe 0
             }
         }
         "when stage has failed" should {
@@ -64,7 +63,7 @@ class StageStatusNotificationTest : WordSpec({
                         "anotherFailedJob" to "https://dummy-gocd-server.com/go/tab/build/detail/" +
                                 "dummyPipeline/10/failedStage/15/anotherFailedJob"
                 )
-                failedPipeline.failedJobsConsoleLogURLs("https://dummy-gocd-server.com").shouldBe(expectedMap)
+                failedPipeline.failedJobsConsoleLogURLs("https://dummy-gocd-server.com") shouldBe expectedMap
             }
         }
     }
@@ -128,18 +127,18 @@ class StageStatusNotificationTest : WordSpec({
             val pipeline = stageStatusNotification.pipeline
             val stage = pipeline.stage
 
-            pipeline.name.shouldBe("dummy")
-            pipeline.counter.shouldBe("6")
+            pipeline.name shouldBe "dummy"
+            pipeline.counter shouldBe "6"
 
-            stage.name.shouldBe("defaultStage")
-            stage.counter.shouldBe("1")
-            stage.state.shouldBe(StageState.Failed)
-            stage.jobs.size.shouldBe(1)
+            stage.name shouldBe "defaultStage"
+            stage.counter shouldBe "1"
+            stage.state shouldBe StageState.Failed
+            stage.jobs.size shouldBe 1
 
             val job = stage.jobs[0]
-            job.name.shouldBe("defaultJob")
-            job.state.shouldBe(JobState.Completed)
-            job.result.shouldBe(JobResult.Failed)
+            job.name shouldBe "defaultJob"
+            job.state shouldBe JobState.Completed
+            job.result shouldBe JobResult.Failed
         }
     }
 })
