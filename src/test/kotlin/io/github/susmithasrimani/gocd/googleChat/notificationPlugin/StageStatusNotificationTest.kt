@@ -59,10 +59,10 @@ class StageStatusNotificationTest : WordSpec({
         "when stage has failed" should {
             "return map with URLs" {
                 val expectedMap = mapOf(
-                        Pair("failedJob", "https://dummy-gocd-server.com/go/tab/build/detail" +
-                                "/dummyPipeline/10/failedStage/15/failedJob"),
-                        Pair("anotherFailedJob", "https://dummy-gocd-server.com/go/tab/build/detail/" +
-                                "dummyPipeline/10/failedStage/15/anotherFailedJob")
+                        "failedJob" to "https://dummy-gocd-server.com/go/tab/build/detail" +
+                                "/dummyPipeline/10/failedStage/15/failedJob",
+                        "anotherFailedJob" to "https://dummy-gocd-server.com/go/tab/build/detail/" +
+                                "dummyPipeline/10/failedStage/15/anotherFailedJob"
                 )
                 failedPipeline.failedJobsConsoleLogURLs("https://dummy-gocd-server.com").shouldBe(expectedMap)
             }

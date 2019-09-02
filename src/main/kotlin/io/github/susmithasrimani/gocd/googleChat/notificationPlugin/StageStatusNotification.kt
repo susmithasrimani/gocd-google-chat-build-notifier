@@ -31,7 +31,7 @@ data class Pipeline(
         return stage.jobs.filter { job ->
             job.state == JobState.Completed && job.result == JobResult.Failed
         }.associate { job ->
-            Pair(job.name, "$goServerHost/go/tab/build/detail/$name/$counter/${stage.name}/${stage.counter}/${job.name}")
+            job.name to "$goServerHost/go/tab/build/detail/$name/$counter/${stage.name}/${stage.counter}/${job.name}"
         }
     }
 }

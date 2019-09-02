@@ -1,11 +1,7 @@
 package io.github.susmithasrimani.gocd.googleChat
 
-import io.github.susmithasrimani.gocd.googleChat.chatMessage.Cards
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.modules.plus
 
 class GoogleChatNotificationPluginTest : FunSpec({
     test("buildChatMessage returns correct json request body for hangouts chat message") {
@@ -86,8 +82,8 @@ class GoogleChatNotificationPluginTest : FunSpec({
   ]
 }"""
         val jobsAndURLs = mapOf(
-                Pair("defaultJob", "https://gocd-server.com/go/tab/build/detail/somepipeline/1/stage/10/defaultJob"),
-                Pair("anotherJob", "https://gocd-server.com/go/tab/build/detail/somepipeline/1/stage/10/anotherJob")
+                "defaultJob" to "https://gocd-server.com/go/tab/build/detail/somepipeline/1/stage/10/defaultJob",
+                "anotherJob" to "https://gocd-server.com/go/tab/build/detail/somepipeline/1/stage/10/anotherJob"
         )
         val plugin = GoogleChatNotificationPlugin()
         val jsonContent = plugin.buildChatMessage("somepipeline/1/stage/10",
