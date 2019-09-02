@@ -12,19 +12,13 @@ data class Pipeline(
         val stage: Stage
 ) {
     // returns a unique string to recognize a stage
-    fun stageID(): String {
-        return "$name/$counter/${stage.name}/${stage.counter}"
-    }
+    fun stageID() = "$name/$counter/${stage.name}/${stage.counter}"
 
     // returns the URL to the stage in the pipeline
-    fun stageURL(goServerHost: String): String {
-        return "$goServerHost/go/pipelines/${stageID()}"
-    }
+    fun stageURL(goServerHost: String) = "$goServerHost/go/pipelines/${stageID()}"
 
     // returns if the stage in the pipeline failed or not
-    fun stageFailed(): Boolean {
-        return stage.state == StageState.Failed
-    }
+    fun stageFailed() = stage.state == StageState.Failed
 
     // returns a map of failed job names to their log urls
     fun failedJobsConsoleLogURLs(goServerHost: String): Map<String, String> {

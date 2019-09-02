@@ -27,6 +27,7 @@ class GoogleChatNotificationPlugin : GoPlugin {
     private val logger: Logger? = Logger.getLoggerFor(this.javaClass)
     private var webhookURL: String = ""
     private var serverHost: String = ""
+
     @Load
     fun onLoad(context: PluginContext) {
         val pathname: String = System.getenv(confPathEnvVarName)
@@ -52,9 +53,8 @@ class GoogleChatNotificationPlugin : GoPlugin {
         this.accessor = accessor
     }
 
-    override fun pluginIdentifier(): GoPluginIdentifier {
-        return GoPluginIdentifier(NOTIFICATION_PLUGIN_KIND, listOf(PLUGIN_API_VERSION))
-    }
+    override fun pluginIdentifier() =
+            GoPluginIdentifier(NOTIFICATION_PLUGIN_KIND, listOf(PLUGIN_API_VERSION))
 
     override fun handle(request: GoPluginApiRequest): GoPluginApiResponse {
         return when (request.requestName()) {
