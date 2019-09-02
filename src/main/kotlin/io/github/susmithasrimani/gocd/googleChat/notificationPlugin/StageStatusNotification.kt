@@ -7,9 +7,9 @@ data class StageStatusNotification(val pipeline: Pipeline)
 
 @Serializable
 data class Pipeline(
-        val name: String,
-        val counter: String,
-        val stage: Stage
+    val name: String,
+    val counter: String,
+    val stage: Stage
 ) {
     // returns a unique string to recognize a stage
     fun stageID(): String {
@@ -31,17 +31,20 @@ data class Pipeline(
         return stage.jobs.filter { job ->
             job.state == JobState.Completed && job.result == JobResult.Failed
         }.associate { job ->
-            Pair(job.name, "$goServerHost/go/tab/build/detail/$name/$counter/${stage.name}/${stage.counter}/${job.name}")
+            Pair(
+                job.name,
+                "$goServerHost/go/tab/build/detail/$name/$counter/${stage.name}/${stage.counter}/${job.name}"
+            )
         }
     }
 }
 
 @Serializable
 data class Stage(
-        val name: String,
-        val counter: String,
-        val state: StageState,
-        val jobs: List<Job>
+    val name: String,
+    val counter: String,
+    val state: StageState,
+    val jobs: List<Job>
 )
 
 enum class StageState {
@@ -53,9 +56,9 @@ enum class StageState {
 
 @Serializable
 data class Job(
-        val name: String,
-        val state: JobState,
-        val result: JobResult
+    val name: String,
+    val state: JobState,
+    val result: JobResult
 )
 
 enum class JobState {

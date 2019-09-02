@@ -1,7 +1,6 @@
 package io.github.susmithasrimani.gocd.googleChat.chatMessage
 
 import kotlinx.serialization.*
-import kotlinx.serialization.modules.SerializersModule
 
 @Serializable
 data class TextMessage(val text: String)
@@ -63,8 +62,8 @@ data class KeyValueWidgetWrapper(val keyValue: KeyValue) : Widget()
 
 @Serializable
 data class KeyValue(
-        val topLabel: String? = null,
-        val content: String,
-        val onClick: OnClick? = null,
-        val button: Button? = null
+    val topLabel: String? = null,
+    val content: String,
+    val onClick: OnClick? = null,
+    val button: Button? = null
 )

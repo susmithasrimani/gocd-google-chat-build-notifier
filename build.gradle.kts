@@ -33,7 +33,7 @@ dependencies {
     // gocd plugin api
     compile("cd.go.plugin:go-plugin-api:19.7.0")
 
-    //lightbend config
+    // lightbend config
     compile("com.typesafe:config:1.3.4")
 
     // fuel library
