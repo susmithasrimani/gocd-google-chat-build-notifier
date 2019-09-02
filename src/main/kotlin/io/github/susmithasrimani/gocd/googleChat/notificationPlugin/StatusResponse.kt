@@ -7,6 +7,4 @@ data class StatusResponse(val status: String, val messages: List<String>)
 
 val SUCCESS_STATUS = StatusResponse("success", emptyList())
 
-fun ErrorStatus(errorMessages: List<String>): StatusResponse {
-    return StatusResponse("error", errorMessages)
-}
+fun errorStatus(errorMessages: List<String>) = StatusResponse("error", errorMessages)

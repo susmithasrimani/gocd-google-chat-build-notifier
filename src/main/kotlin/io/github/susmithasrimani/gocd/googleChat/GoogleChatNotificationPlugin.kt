@@ -18,7 +18,6 @@ import io.github.susmithasrimani.gocd.googleChat.chatMessage.*
 import io.github.susmithasrimani.gocd.googleChat.notificationPlugin.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.modules.plus
 import java.io.File
 
 @Extension
@@ -28,6 +27,7 @@ class GoogleChatNotificationPlugin : GoPlugin {
     private val logger: Logger? = Logger.getLoggerFor(this.javaClass)
     private var webhookURL: String = ""
     private var serverHost: String = ""
+
     @Load
     fun onLoad(context: PluginContext) {
         val pathname: String = System.getenv(confPathEnvVarName)
@@ -53,9 +53,8 @@ class GoogleChatNotificationPlugin : GoPlugin {
         this.accessor = accessor
     }
 
-    override fun pluginIdentifier(): GoPluginIdentifier {
-        return GoPluginIdentifier(NOTIFICATION_PLUGIN_KIND, listOf(PLUGIN_API_VERSION))
-    }
+    override fun pluginIdentifier() =
+            GoPluginIdentifier(NOTIFICATION_PLUGIN_KIND, listOf(PLUGIN_API_VERSION))
 
     override fun handle(request: GoPluginApiRequest): GoPluginApiResponse {
         return when (request.requestName()) {
@@ -90,7 +89,7 @@ class GoogleChatNotificationPlugin : GoPlugin {
         }
 
         val failureResponseBody = json.stringify(StatusResponse.serializer(),
-                ErrorStatus(listOf("could not send hangouts notification")))
+                errorStatus(listOf("could not send hangouts notification")))
 
         return DefaultGoPluginApiResponse(FAILURE_RESPONSE_CODE, failureResponseBody)
     }
