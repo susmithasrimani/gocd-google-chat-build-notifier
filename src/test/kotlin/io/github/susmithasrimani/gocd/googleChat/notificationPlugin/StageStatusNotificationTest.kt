@@ -23,7 +23,6 @@ class StageStatusNotificationTest : WordSpec({
             failedPipeline.stageURL("https://dummy-gocd-server.com")
                     .shouldBe("https://dummy-gocd-server.com/go/pipelines/dummyPipeline/10/" +
                             "failedStage/15")
-
         }
     }
 
@@ -32,7 +31,6 @@ class StageStatusNotificationTest : WordSpec({
             failedPipeline.stageID()
                     .shouldBe("dummyPipeline/10/" +
                             "failedStage/15")
-
         }
     }
 
@@ -143,4 +141,3 @@ class StageStatusNotificationTest : WordSpec({
         }
     }
 })
-

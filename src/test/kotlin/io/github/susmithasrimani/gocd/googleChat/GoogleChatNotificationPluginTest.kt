@@ -1,10 +1,7 @@
 package io.github.susmithasrimani.gocd.googleChat
 
-import io.github.susmithasrimani.gocd.googleChat.chatMessage.Cards
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.plus
 
 class GoogleChatNotificationPluginTest : FunSpec({
