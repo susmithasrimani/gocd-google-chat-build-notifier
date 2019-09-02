@@ -1,4 +1,4 @@
-# gocd-google-chat-build-notifier
+# gocd-google-chat-build-notifier [![Build Status](https://travis-ci.org/susmithasrimani/gocd-google-chat-build-notifier.svg?branch=master)](https://travis-ci.org/susmithasrimani/gocd-google-chat-build-notifier)
 
 [Google Chat](https://chat.google.com) based GoCD build notifier
 
