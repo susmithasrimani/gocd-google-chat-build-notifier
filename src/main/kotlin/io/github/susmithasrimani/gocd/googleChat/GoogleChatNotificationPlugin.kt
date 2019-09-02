@@ -14,10 +14,11 @@ import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest
 import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse
 import com.typesafe.config.ConfigFactory
-import io.github.susmithasrimani.gocd.googleChat.chatMessage.TextMessage
+import io.github.susmithasrimani.gocd.googleChat.chatMessage.*
 import io.github.susmithasrimani.gocd.googleChat.notificationPlugin.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.modules.plus
 import java.io.File
 
 @Extension
@@ -78,9 +79,7 @@ class GoogleChatNotificationPlugin : GoPlugin {
         val failedStageURL = stageStatusNotification.pipeline.stageURL(serverHost)
         val failedJobsConsoleLogURLs = stageStatusNotification.pipeline.failedJobsConsoleLogURLs(serverHost)
 
-        val hangoutsChatMessage = TextMessage("Stage $failedStageID failed $failedStageURL. " +
-                "Check job logs - ${failedJobsConsoleLogURLs.map { (job, jobURL) -> "$job : $jobURL" }.joinToString("\n")}")
-        val hangoutsAPIRequestBody = json.stringify(TextMessage.serializer(), hangoutsChatMessage)
+        val hangoutsAPIRequestBody = buildChatMessage(failedStageID, failedStageURL, failedJobsConsoleLogURLs)
 
         val (_, apiResponse, _) = Fuel.post(webhookURL)
                 .jsonBody(hangoutsAPIRequestBody)
@@ -94,6 +93,61 @@ class GoogleChatNotificationPlugin : GoPlugin {
                 ErrorStatus(listOf("could not send hangouts notification")))
 
         return DefaultGoPluginApiResponse(FAILURE_RESPONSE_CODE, failureResponseBody)
+    }
+
+    fun buildChatMessage(failedStageID: String,
+                         failedStageURL: String,
+                         failedJobsConsoleLogURLs: Map<String, String>): String {
+
+        val keyValueWidgets: List<Widget> =
+                failedJobsConsoleLogURLs.map { (jobName, jobURL) ->
+                    KeyValueWidgetWrapper(keyValue = KeyValue(
+                            topLabel = "Job Name",
+                            content = jobName,
+                            button = TextButtonWrapper(
+                                    textButton = TextButton(
+                                            text = "View Console Logs",
+                                            onClick = OnClick(
+                                                    openLink = URL(jobURL)
+                                            )
+                                    )
+                            )
+                    ))
+                }
+
+        val hangoutsChatMessage = Cards(
+                listOf(Card(header = Header(title = "Stage failed"), sections = listOf(Section(
+                        widgets = listOf(
+                                KeyValueWidgetWrapper(keyValue = KeyValue(
+                                        topLabel = "Stage",
+                                        content = failedStageID,
+                                        onClick = OnClick(
+                                                openLink = URL(failedStageURL)
+                                        )
+                                ))
+                        ) + keyValueWidgets
+                ), Section(
+                        widgets = listOf(
+                                ButtonsWidget(buttons = listOf(TextButtonWrapper(textButton = TextButton(
+                                        text = "Open Stage",
+                                        onClick = OnClick(
+                                                openLink = URL(failedStageURL)
+                                        )
+                                ))))
+                        )
+                ))
+                ))
+        )
+
+        val jsonConfiguration = JsonConfiguration.Stable.copy(
+                strictMode = false,
+                encodeDefaults = false,
+                prettyPrint = true,
+                indent = "  "
+        )
+        val json = Json(jsonConfiguration)
+
+        return json.stringify(Cards.serializer(), hangoutsChatMessage)
     }
 
     private fun handleNotificationsInterestedIn(): GoPluginApiResponse {
