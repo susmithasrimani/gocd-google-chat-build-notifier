@@ -2,6 +2,7 @@ package io.github.susmithasrimani.gocd.googleChat
 
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
+import kotlinx.serialization.modules.plus
 
 class GoogleChatNotificationPluginTest : FunSpec({
     test("buildChatMessage returns correct json request body for hangouts chat message") {

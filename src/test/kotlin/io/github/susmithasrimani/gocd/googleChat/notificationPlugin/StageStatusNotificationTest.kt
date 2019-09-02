@@ -24,14 +24,12 @@ class StageStatusNotificationTest : WordSpec({
         "return correct URL given server host" {
             val expected = "https://dummy-gocd-server.com/go/pipelines/dummyPipeline/10/failedStage/15"
             failedPipeline.stageURL("https://dummy-gocd-server.com") shouldBe expected
-
         }
     }
 
     "stageID" should {
         "return correct ID" {
             failedPipeline.stageID() shouldBe "dummyPipeline/10/failedStage/15"
-
         }
     }
 
@@ -142,4 +140,3 @@ class StageStatusNotificationTest : WordSpec({
         }
     }
 })
-

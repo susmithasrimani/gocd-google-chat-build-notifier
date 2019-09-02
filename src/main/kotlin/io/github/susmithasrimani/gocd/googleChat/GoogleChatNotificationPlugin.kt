@@ -94,9 +94,11 @@ class GoogleChatNotificationPlugin : GoPlugin {
         return DefaultGoPluginApiResponse(FAILURE_RESPONSE_CODE, failureResponseBody)
     }
 
-    fun buildChatMessage(failedStageID: String,
-                         failedStageURL: String,
-                         failedJobsConsoleLogURLs: Map<String, String>): String {
+    fun buildChatMessage(
+        failedStageID: String,
+        failedStageURL: String,
+        failedJobsConsoleLogURLs: Map<String, String>
+    ): String {
 
         val keyValueWidgets: List<Widget> =
                 failedJobsConsoleLogURLs.map { (jobName, jobURL) ->
