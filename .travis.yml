@@ -3,6 +3,7 @@ jdk:
 - openjdk10
 - openjdk11
 script:
+- "./gradlew ktlintCheck"
 - "./gradlew test"
 - "./gradlew build"
 - "./gradlew uberJar"
