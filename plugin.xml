@@ -7,7 +7,7 @@
         <description>Send build notifications to Google Chat room</description>
         <vendor>
             <name>Susmitha</name>
-            <url>www.github.com/susmithasrimani</url>
+            <url>https://www.github.com/susmithasrimani</url>
         </vendor>
         <target-os>
             <value>Linux</value>
