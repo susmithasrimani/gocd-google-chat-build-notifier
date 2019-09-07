@@ -21,12 +21,17 @@ import kotlinx.serialization.json.JsonConfiguration
 import java.io.File
 
 @Extension
-class GoogleChatNotificationPlugin : GoPlugin {
+class GoogleChatNotificationPlugin() : GoPlugin {
     private val confPathEnvVarName = "GCHAT_NOTIFIER_CONF_PATH"
     private var accessor: GoApplicationAccessor? = null
     private val logger: Logger? = Logger.getLoggerFor(this.javaClass)
     private var webhookURL: String = ""
     private var serverHost: String = ""
+
+    constructor (webhookURL: String, serverHost: String) : this() {
+        this.webhookURL = webhookURL
+        this.serverHost = serverHost
+    }
 
     @Load
     fun onLoad(context: PluginContext) {

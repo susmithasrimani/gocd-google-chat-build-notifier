@@ -9,6 +9,7 @@ repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenCentral()
 }
 
 val test by tasks.getting(Test::class) {
@@ -27,6 +28,9 @@ dependencies {
 
     // kotlintest test framework
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.0")
+
+    // komock
+    testImplementation("ua.com.lavi:komock-core:1.10.0")
 
     compile("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.12.0")
 
