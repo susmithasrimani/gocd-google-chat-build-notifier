@@ -32,6 +32,7 @@ set.GCHAT_NOTIFIER_CONF_PATH=/usr/local/some/path/gchat_notif.conf
 ##Setup and Configuration for GoCD on Kubernetes Using Helm
 
 ###Adding the plugin
+- In order to add this plugin, you have to use a local values.yaml file that will override the default [values.yaml](https://github.com/helm/charts/blob/master/stable/gocd/values.yaml) present in the official GoCD helm chart repo. 
 - Add the .jar file link from the releases section to the `env.extraEnvVars` section as a new environment variable.
 - The environment variable name must have the `GOCD_PLUGIN_INSTALL` prefixed to it.
 - Example
