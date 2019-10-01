@@ -28,3 +28,52 @@ Or you can set environment variables by checking [this doc](https://docs.gocd.or
 set.GCHAT_NOTIFIER_CONF_PATH=/usr/local/some/path/gchat_notif.conf
 ```
 * Finally restart the GoCD server so that the plugin is loaded and can send build notifications to [Google Chat](https://chat.google.com)
+
+##Setup and Configuration for GoCD on Kubernetes Using Helm
+
+###Adding the plugin
+- Add the .jar file link from the releases section to the `env.extraEnvVars` section as a new environment variable.
+- The environment variable name must have the `GOCD_PLUGIN_INSTALL` prefixed to it.
+- Example
+
+```
+env:
+  extraEnvVars:
+    - name: GOCD_PLUGIN_INSTALL_google-chat-notification-plugin
+      value: https://github.com/susmithasrimani/gocd-google-chat-build-notifier/releases/download/v0.1.0-alpha/gocd-google-chat-build-notifier-plugin.jar
+```
+- Make sure to replace the value with the latest release.
+
+###Mounting the config file
+- You can mount the config file as a kubernetes secret.
+- You first have to create a file that has the config values, for example `gchat_notif.conf`
+- Then create the secret using this file in the proper namespace 
+
+```
+kubectl create secret generic gchat-config \
+--from-file=gchat_notif.conf=gchat_notif.conf \
+--namespace=gocd
+```
+
+- Then you have to mount the secret to a location.
+
+```
+persistence:
+  extraVolumes:
+    - name: gchat-config
+      secret:
+        secretName: gchat-config
+        defaultMode: 0744
+
+  extraVolumeMounts:
+    - name: gchat-notifier
+      mountPath: /tmp/gchat
+      readOnly: true
+```
+- And finally add the location of the config file as an environment variable
+```
+env:
+  extraEnvVars:
+    - name: GCHAT_NOTIFIER_CONF_PATH
+      value: /tmp/gchat/gchat-notif.conf
+```
