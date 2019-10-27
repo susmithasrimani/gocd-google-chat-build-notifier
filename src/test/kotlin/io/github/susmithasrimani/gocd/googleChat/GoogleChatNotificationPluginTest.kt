@@ -1,6 +1,7 @@
 package io.github.susmithasrimani.gocd.googleChat
 
 import com.thoughtworks.go.plugin.api.request.DefaultGoPluginApiRequest
+import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse
 import io.kotlintest.matchers.collections.shouldHaveSize
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
@@ -507,6 +508,19 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
         response.responseCode() shouldBe 200
         response.responseBody() shouldBe expectedResponseBody
+    }
+
+    test("miscellaneous or not handled request type gives a default response") {
+        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+
+        val request = DefaultGoPluginApiRequest("notification", "2", "blah-bloo")
+
+        val response = plugin.handle(request)
+
+        val expectedResponse = DefaultGoPluginApiResponse(200)
+
+        response.responseCode() shouldBe expectedResponse.responseCode()
+        response.responseBody() shouldBe expectedResponse.responseBody()
     }
 })
 
