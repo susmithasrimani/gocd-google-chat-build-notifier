@@ -28,7 +28,7 @@ $ cd /gocd-google-chat-build-notifier/
 
 Common steps continued:
 ```
-$ # first test run alone will take a few minutes
+$ # first time test run alone will take a few minutes
 $ ./gradlew test
 $ # now run build to make sure everything compiles
 $ ./gradlew build
@@ -36,6 +36,10 @@ $ # now build the plugin jar - a fat/uber jar
 $ ./gradlew uberJar
 $ # check the plugin jar
 $ ls build/libs/gocd-google-chat-build-notifier-uber.jar
+$ # to get code coverage report run this
+$ ./gradlew jacocoTestReport
+$ # check the report here. it can be opened with the browser
+$ ls build/reports/jacoco/test/html/index.html
 ```
 
 Subsequent gradle runs will be quite fast! Make changes to the code and run the 

@@ -3,8 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.jvm").version("1.3.50")
     id("org.jetbrains.kotlin.plugin.serialization").version("1.3.50")
     id("org.jlleitschuh.gradle.ktlint") version "8.2.0"
+    jacoco
 }
-
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
