@@ -5,6 +5,7 @@ jdk:
 script:
 - "./gradlew ktlintCheck"
 - "./gradlew test"
+- "./gradlew jacocoTestCoverageVerification"
 - "./gradlew build"
 - "./gradlew uberJar"
 
