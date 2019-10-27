@@ -1,10 +1,16 @@
 package io.github.susmithasrimani.gocd.googleChat
 
+import com.thoughtworks.go.plugin.api.GoApplicationAccessor
 import com.thoughtworks.go.plugin.api.request.DefaultGoPluginApiRequest
 import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse
+import com.thoughtworks.go.plugin.api.response.GoApiResponse
 import io.kotlintest.matchers.collections.shouldHaveSize
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import ua.com.lavi.komock.http.server.MockServer
 import ua.com.lavi.komock.http.server.UnsecuredMockServer
 import ua.com.lavi.komock.model.config.http.CaptureProperties
@@ -103,7 +109,13 @@ class GoogleChatNotificationPluginTest : FunSpec({
     }
 
     test("stage status changed for failed stage sends message to hangouts") {
-        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+        //        val mockGoApplicationAccessor = createMockGoApplicationAccessor()
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val mockGoApiResponse = mockk<GoApiResponse>()
+        every { mockGoApiResponse.responseCode() } returns 200
+        every { mockGoApiResponse.responseBody() } returns "{\"webhookUrl\":\"http://localhost:9090\"}"
+        every { mockGoApplicationAccessor.submit(isNull(inverse = true)) } returns mockGoApiResponse
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
         val mockServer = createMockHangoutsChatServer()
         mockServer.start()
 
@@ -261,11 +273,19 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
         capturedData.requestHeaders["Content-Type"] shouldBe "application/json"
         capturedData.requestBody shouldBe expectedHangoutsChatRequestBody
+
+        verify { mockGoApiResponse.responseCode() }
+        verify { mockGoApiResponse.responseBody() }
+        verify { mockGoApplicationAccessor.submit(any()) }
+
+        confirmVerified(mockGoApiResponse)
+        confirmVerified(mockGoApplicationAccessor)
         mockServer.stop()
     }
 
     test("stage status changed for successful stage does not send message to hangouts") {
-        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
         val mockServer = createMockHangoutsChatServer()
         mockServer.start()
 
@@ -345,7 +365,8 @@ class GoogleChatNotificationPluginTest : FunSpec({
     }
 
     test("stage status changed for building stage does not send message to hangouts") {
-        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
         val mockServer = createMockHangoutsChatServer()
         mockServer.start()
 
@@ -426,7 +447,8 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
     test("stage status changed for failed stage fails to send message to hangouts " +
         "when hangouts is not reachable") {
-        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "stage-status")
         val requestBody = """
@@ -499,7 +521,8 @@ class GoogleChatNotificationPluginTest : FunSpec({
     }
 
     test("notifications interested in gives stage status notifications in response") {
-        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "notifications-interested-in")
         val expectedResponseBody = """{"notifications":["stage-status"]}"""
@@ -510,8 +533,122 @@ class GoogleChatNotificationPluginTest : FunSpec({
         response.responseBody() shouldBe expectedResponseBody
     }
 
+    test("get settings view request gives plugin settings view template in response") {
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+
+        val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.get-view")
+        val expectedResponseBody = "{\"template\":\"<div class=\\\"form_item_block\\\">" +
+            "<label>Webhook URL:<span class='asterix'>*</span></label>" +
+            "<input type=\\\"text\\\" ng-model=\\\"webhookUrl\\\" " +
+            "placeholder=\\\"https://chat.googleapis.com/v1/spaces/ABCDEF/messages?key=abcdefgh&token=abcdefgh\\\"/>" +
+            "<span class=\\\"form_error\\\" ng-show=\\\"GOINPUTNAME[webhookUrl].\$error.server\\\">" +
+            "{{ GOINPUTNAME[webhookUrl].\$error.server}}" +
+            "</span></div>\"}"
+
+        val response = plugin.handle(request)
+
+        response.responseCode() shouldBe 200
+        response.responseBody() shouldBe expectedResponseBody
+    }
+
+    test("get plugin configuration request gives plugin configuration in response") {
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+
+        val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.get-configuration")
+        val expectedResponseBody = """{
+  "webhookUrl": {
+    "display-name": "Webhook URL",
+    "display-order": "0",
+    "required": true,
+    "secure": true
+  }
+}"""
+
+        val response = plugin.handle(request)
+
+        response.responseCode() shouldBe 200
+        response.responseBody() shouldBe expectedResponseBody
+    }
+
+    context("validate plugin configuration request") {
+        test("returns plugin configuration is not valid in response when value is not present") {
+            val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+
+            val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.validate-configuration")
+            val requestBody = """{
+  "plugin-settings": {
+      "webhookUrl":{}
+  }
+}"""
+            request.setRequestBody(requestBody)
+            val expectedResponseBody = """[
+  {
+    "key": "webhookUrl",
+    "message": "Webhook URL cannot be empty"
+  }
+]"""
+
+            val response = plugin.handle(request)
+
+            response.responseCode() shouldBe 200
+            response.responseBody() shouldBe expectedResponseBody
+        }
+
+        test("returns plugin configuration is not valid in response when it's not valid") {
+            val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+
+            val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.validate-configuration")
+            val requestBody = """{
+  "plugin-settings": {
+      "webhookUrl": {
+        "value": "   "
+      }
+  }
+}"""
+            request.setRequestBody(requestBody)
+            val expectedResponseBody = """[
+  {
+    "key": "webhookUrl",
+    "message": "Webhook URL cannot be empty"
+  }
+]"""
+
+            val response = plugin.handle(request)
+
+            response.responseCode() shouldBe 200
+            response.responseBody() shouldBe expectedResponseBody
+        }
+
+        test("returns plugin configuration is valid in response when it's valid") {
+            val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+
+            val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.validate-configuration")
+            val requestBody = """{
+  "plugin-settings": {
+      "webhookUrl": {
+        "value": "https://some-url.over-here.com"
+      }
+  }
+}"""
+            request.setRequestBody(requestBody)
+            val expectedResponseBody = """[
+]"""
+
+            val response = plugin.handle(request)
+
+            response.responseCode() shouldBe 200
+            response.responseBody() shouldBe expectedResponseBody
+        }
+    }
+
     test("miscellaneous or not handled request type gives a default response") {
-        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+        val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "blah-bloo")
 

@@ -10,6 +10,7 @@ import com.thoughtworks.go.plugin.api.annotation.Load
 import com.thoughtworks.go.plugin.api.annotation.UnLoad
 import com.thoughtworks.go.plugin.api.info.PluginContext
 import com.thoughtworks.go.plugin.api.logging.Logger
+import com.thoughtworks.go.plugin.api.request.DefaultGoApiRequest
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest
 import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse
@@ -18,6 +19,7 @@ import io.github.susmithasrimani.gocd.googleChat.chatMessage.*
 import io.github.susmithasrimani.gocd.googleChat.notificationPlugin.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.list
 import java.io.File
 
 @Extension
@@ -28,7 +30,8 @@ class GoogleChatNotificationPlugin() : GoPlugin {
     private var webhookURL: String = ""
     private var serverHost: String = ""
 
-    constructor (webhookURL: String, serverHost: String) : this() {
+    constructor (accessor: GoApplicationAccessor, webhookURL: String, serverHost: String) : this() {
+        this.accessor = accessor
         this.webhookURL = webhookURL
         this.serverHost = serverHost
     }
@@ -36,7 +39,7 @@ class GoogleChatNotificationPlugin() : GoPlugin {
     @Load
     fun onLoad(context: PluginContext) {
         val pathname: String = System.getenv(confPathEnvVarName)
-                ?: throw Exception("$confPathEnvVarName environment variable is not defined")
+            ?: throw Exception("$confPathEnvVarName environment variable is not defined")
         val file = File(pathname)
 
         val config = ConfigFactory.parseFile(file)
@@ -59,14 +62,50 @@ class GoogleChatNotificationPlugin() : GoPlugin {
     }
 
     override fun pluginIdentifier() =
-            GoPluginIdentifier(NOTIFICATION_PLUGIN_KIND, listOf(PLUGIN_API_VERSION))
+        GoPluginIdentifier(NOTIFICATION_PLUGIN_KIND, listOf(PLUGIN_API_VERSION))
 
     override fun handle(request: GoPluginApiRequest): GoPluginApiResponse {
         return when (request.requestName()) {
             REQUEST_NOTIFICATIONS_INTERESTED_IN -> handleNotificationsInterestedIn()
             REQUEST_STAGE_STATUS_CHANGED -> handleStageStatusChanged(request)
+            PLUGIN_SETTINGS_GET_VIEW -> handlePluginSettingsGetView()
+            PLUGIN_SETTINGS_GET_CONFIGURATION -> handlePluginSettingsGetConfiguration()
+            PLUGIN_SETTINGS_VALIDATE_CONFIGURATION -> handlePluginSettingsValidateConfiguration(request)
             else -> DefaultGoPluginApiResponse(SUCCESSFUL_RESPONSE_CODE)
         }
+    }
+
+    private fun handlePluginSettingsValidateConfiguration(request: GoPluginApiRequest): GoPluginApiResponse {
+        val json = Json(JsonConfiguration.Stable.copy(prettyPrint = true, indent = "  "))
+        val pluginConfigToBeValidated = json.parse(ValidatePluginConfigRequest.serializer(), request.requestBody())
+        val webhookUrl = pluginConfigToBeValidated.config.webhookUrl.value.trim()
+        val successResponseBody = json.stringify(ValidationError.serializer().list, emptyList())
+
+        if (webhookUrl == "") {
+            val validationError = ValidationError(key = "webhookUrl", message = "Webhook URL cannot be empty")
+            val responseBody = json.stringify(ValidationError.serializer().list, listOf(validationError))
+            return DefaultGoPluginApiResponse(SUCCESSFUL_RESPONSE_CODE, responseBody)
+        }
+
+        return DefaultGoPluginApiResponse(SUCCESSFUL_RESPONSE_CODE, successResponseBody)
+    }
+
+    private fun handlePluginSettingsGetConfiguration(): GoPluginApiResponse {
+        val json = Json(JsonConfiguration.Stable.copy(prettyPrint = true, indent = "  "))
+        val responseBody = json.stringify(GetConfigResponse.serializer(),
+            GetConfigResponse(webhookUrl = ConfigAttributes(
+                displayName = "Webhook URL",
+                displayOrder = "0",
+                required = true,
+                secure = true)))
+        return DefaultGoPluginApiResponse(200, responseBody)
+    }
+
+    private fun handlePluginSettingsGetView(): GoPluginApiResponse {
+        val json = Json(JsonConfiguration.Stable)
+        val responseBody = json.stringify(GetViewResponse.serializer(),
+            GetViewResponse(viewTemplate))
+        return DefaultGoPluginApiResponse(200, responseBody)
     }
 
     private fun handleStageStatusChanged(request: GoPluginApiRequest): GoPluginApiResponse {
@@ -85,18 +124,56 @@ class GoogleChatNotificationPlugin() : GoPlugin {
 
         val hangoutsAPIRequestBody = buildChatMessage(failedStageID, failedStageURL, failedJobsConsoleLogURLs)
 
-        val (_, apiResponse, _) = Fuel.post(webhookURL)
-                .jsonBody(hangoutsAPIRequestBody)
-                .response()
+        val config = getConfig()
+
+        val hangoutsAPIEndpoint = config!!.webhookUrl
+        val (_, apiResponse, _) = Fuel.post(hangoutsAPIEndpoint)
+            .jsonBody(hangoutsAPIRequestBody)
+            .response()
 
         if (apiResponse.statusCode == 200) {
             return DefaultGoPluginApiResponse(SUCCESSFUL_RESPONSE_CODE, successResponseBody)
         }
 
         val failureResponseBody = json.stringify(StatusResponse.serializer(),
-                errorStatus(listOf("could not send hangouts notification")))
+            errorStatus(listOf("could not send hangouts notification")))
 
         return DefaultGoPluginApiResponse(FAILURE_RESPONSE_CODE, failureResponseBody)
+    }
+
+    private fun getConfig(): Config? {
+        val request = DefaultGoApiRequest(
+            PLUGIN_SETTINGS_GET,
+            "1.0",
+            pluginIdentifier()
+        )
+
+        val jsonConfiguration = JsonConfiguration.Stable
+        val json = Json(jsonConfiguration)
+        val getPluginConfigRequestBody =
+            json.stringify(GetPluginConfigRequest.serializer(),
+                GetPluginConfigRequest("io.github.susmithasrimani.gocd.googleChat"))
+
+        request.setRequestBody(getPluginConfigRequestBody)
+
+        if (accessor == null) {
+            return null
+        }
+
+        val response = accessor?.submit(request)
+
+        if (response == null) {
+            logger?.error("received null response while trying to get config from GoCD server")
+            return null
+        }
+
+        if (response.responseCode() != 200) {
+            logger?.error("The GoCD server sent an unexpected status code " + response.responseCode() +
+                " with the response body " + response.responseBody())
+            return null
+        }
+
+        return json.parse(Config.serializer(), response.responseBody())
     }
 
     fun buildChatMessage(
@@ -106,50 +183,50 @@ class GoogleChatNotificationPlugin() : GoPlugin {
     ): String {
 
         val keyValueWidgets: List<Widget> =
-                failedJobsConsoleLogURLs.map { (jobName, jobURL) ->
-                    KeyValueWidgetWrapper(keyValue = KeyValue(
-                            topLabel = "Job Name",
-                            content = jobName,
-                            button = TextButtonWrapper(
-                                    textButton = TextButton(
-                                            text = "View Console Logs",
-                                            onClick = OnClick(
-                                                    openLink = URL(jobURL)
-                                            )
-                                    )
+            failedJobsConsoleLogURLs.map { (jobName, jobURL) ->
+                KeyValueWidgetWrapper(keyValue = KeyValue(
+                    topLabel = "Job Name",
+                    content = jobName,
+                    button = TextButtonWrapper(
+                        textButton = TextButton(
+                            text = "View Console Logs",
+                            onClick = OnClick(
+                                openLink = URL(jobURL)
                             )
-                    ))
-                }
+                        )
+                    )
+                ))
+            }
 
         val hangoutsChatMessage = Cards(
-                listOf(Card(header = Header(title = "Stage failed"), sections = listOf(Section(
-                        widgets = listOf(
-                                KeyValueWidgetWrapper(keyValue = KeyValue(
-                                        topLabel = "Stage",
-                                        content = failedStageID,
-                                        onClick = OnClick(
-                                                openLink = URL(failedStageURL)
-                                        )
-                                ))
-                        ) + keyValueWidgets
-                ), Section(
-                        widgets = listOf(
-                                ButtonsWidget(buttons = listOf(TextButtonWrapper(textButton = TextButton(
-                                        text = "Open Stage",
-                                        onClick = OnClick(
-                                                openLink = URL(failedStageURL)
-                                        )
-                                ))))
+            listOf(Card(header = Header(title = "Stage failed"), sections = listOf(Section(
+                widgets = listOf(
+                    KeyValueWidgetWrapper(keyValue = KeyValue(
+                        topLabel = "Stage",
+                        content = failedStageID,
+                        onClick = OnClick(
+                            openLink = URL(failedStageURL)
                         )
-                ))
-                ))
+                    ))
+                ) + keyValueWidgets
+            ), Section(
+                widgets = listOf(
+                    ButtonsWidget(buttons = listOf(TextButtonWrapper(textButton = TextButton(
+                        text = "Open Stage",
+                        onClick = OnClick(
+                            openLink = URL(failedStageURL)
+                        )
+                    ))))
+                )
+            ))
+            ))
         )
 
         val jsonConfiguration = JsonConfiguration.Stable.copy(
-                strictMode = false,
-                encodeDefaults = false,
-                prettyPrint = true,
-                indent = "  "
+            strictMode = false,
+            encodeDefaults = false,
+            prettyPrint = true,
+            indent = "  "
         )
         val json = Json(jsonConfiguration)
 
@@ -159,7 +236,7 @@ class GoogleChatNotificationPlugin() : GoPlugin {
     private fun handleNotificationsInterestedIn(): GoPluginApiResponse {
         val json = Json(JsonConfiguration.Stable)
         val responseBody = json.stringify(NotificationsInterestedResponse.serializer(),
-                NotificationsInterestedResponse(listOf(STAGE_STATUS_NOTIFICATION)))
+            NotificationsInterestedResponse(listOf(STAGE_STATUS_NOTIFICATION)))
         return DefaultGoPluginApiResponse(200, responseBody)
     }
 }

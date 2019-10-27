@@ -29,6 +29,9 @@ dependencies {
     // kotlintest test framework
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.0")
 
+    // mockk testing library for mocking
+    testImplementation("io.mockk:mockk:1.9.3")
+
     // komock
     testImplementation("ua.com.lavi:komock-core:1.10.0")
 
