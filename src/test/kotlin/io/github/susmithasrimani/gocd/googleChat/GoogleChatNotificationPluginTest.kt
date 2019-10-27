@@ -496,6 +496,18 @@ class GoogleChatNotificationPluginTest : FunSpec({
         response.responseCode() shouldBe 500
         response.responseBody() shouldBe expectedResponseBody
     }
+
+    test("notifications interested in gives stage status notifications in response") {
+        val plugin = GoogleChatNotificationPlugin("http://localhost:9090/", "https://gocd-server.com")
+
+        val request = DefaultGoPluginApiRequest("notification", "2", "notifications-interested-in")
+        val expectedResponseBody = """{"notifications":["stage-status"]}"""
+
+        val response = plugin.handle(request)
+
+        response.responseCode() shouldBe 200
+        response.responseBody() shouldBe expectedResponseBody
+    }
 })
 
 fun createMockHangoutsChatServer(): MockServer {
