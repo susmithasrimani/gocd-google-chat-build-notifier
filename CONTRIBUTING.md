@@ -40,6 +40,11 @@ $ # to get code coverage report run this
 $ ./gradlew jacocoTestReport
 $ # check the report here. it can be opened with the browser
 $ ls build/reports/jacoco/test/html/index.html
+$ # to automatically lint your code using ktlint formatter
+$ # you can use a git pre commit hook. add it like this
+$ ./gradlew addKtlintFormatGitPreCommitHook
+$ # to check the various other gradle tasks present
+$ ./gradlew tasks
 ```
 
 Subsequent gradle runs will be quite fast! Make changes to the code and run the 
