@@ -78,3 +78,7 @@ env:
     - name: GCHAT_NOTIFIER_CONF_PATH
       value: /tmp/gchat/gchat-notif.conf
 ```
+
+## Contributing
+
+Check [CONTRIBUTING.md](CONTRIBUTING.md) ! 😄

@@ -3,6 +3,10 @@
 First of all, thanks for contributing to this project. Everyone is welcome to contribute. 
 You can follow the below steps to understand how to get started with contributing
 
+## Learning about GoCD
+
+Easiest way to get started with GoCD is to give it a test drive using [this](https://www.gocd.org/test-drive-gocd.html)
+
 ## Dev environment setup
 The easiest way to setup would be to use [`docker`](https://docker.com). That is, you can do the coding in your editor in host machine,
 run tests, build and everything in docker. If you have Java installed in your machine, that's good too.
