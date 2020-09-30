@@ -115,7 +115,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
         every { mockGoApiResponse.responseCode() } returns 200
         every { mockGoApiResponse.responseBody() } returns "{\"webhookUrl\":\"http://localhost:9090\"}"
         every { mockGoApplicationAccessor.submit(isNull(inverse = true)) } returns mockGoApiResponse
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
         val mockServer = createMockHangoutsChatServer()
         mockServer.start()
 
@@ -285,7 +285,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
     test("stage status changed for successful stage does not send message to hangouts") {
         val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
         val mockServer = createMockHangoutsChatServer()
         mockServer.start()
 
@@ -366,7 +366,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
     test("stage status changed for building stage does not send message to hangouts") {
         val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
         val mockServer = createMockHangoutsChatServer()
         mockServer.start()
 
@@ -448,7 +448,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
     test("stage status changed for failed stage fails to send message to hangouts " +
         "when hangouts is not reachable") {
         val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "stage-status")
         val requestBody = """
@@ -522,7 +522,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
     test("notifications interested in gives stage status notifications in response") {
         val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "notifications-interested-in")
         val expectedResponseBody = """{"notifications":["stage-status"]}"""
@@ -535,7 +535,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
     test("get settings view request gives plugin settings view template in response") {
         val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.get-view")
         val expectedResponseBody = "{\"template\":\"<div class=\\\"form_item_block\\\">" +
@@ -554,7 +554,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
     test("get plugin configuration request gives plugin configuration in response") {
         val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.get-configuration")
         val expectedResponseBody = """{
@@ -575,7 +575,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
     context("validate plugin configuration request") {
         test("returns plugin configuration is not valid in response when value is not present") {
             val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
             val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.validate-configuration")
             val requestBody = """{
@@ -599,7 +599,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
         test("returns plugin configuration is not valid in response when it's not valid") {
             val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
             val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.validate-configuration")
             val requestBody = """{
@@ -625,7 +625,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
         test("returns plugin configuration is valid in response when it's valid") {
             val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+            val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
             val request = DefaultGoPluginApiRequest("notification", "2", "go.plugin-settings.validate-configuration")
             val requestBody = """{
@@ -648,7 +648,7 @@ class GoogleChatNotificationPluginTest : FunSpec({
 
     test("miscellaneous or not handled request type gives a default response") {
         val mockGoApplicationAccessor = mockk<GoApplicationAccessor>()
-        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "http://localhost:9090/", "https://gocd-server.com")
+        val plugin = GoogleChatNotificationPlugin(mockGoApplicationAccessor, "https://gocd-server.com")
 
         val request = DefaultGoPluginApiRequest("notification", "2", "blah-bloo")
 
