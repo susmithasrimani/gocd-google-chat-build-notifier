@@ -3,7 +3,6 @@
 ## Plugin Code Walkthrough
 
 The plugin currently has the following features:
-* The user can set Google Chat Webhook URL through the plugin configuration
 * Send notifications when a build fails - particularly a stage in a build
 pipeline
 

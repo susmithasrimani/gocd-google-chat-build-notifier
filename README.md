@@ -11,11 +11,8 @@ To use this plugin, download the plugin jar from the [releases page](https://git
 * Create a config file for example `gchat_notif.conf` like this:
 
 ```
-webhookUrl: "https://chat.googleapis.com/v1/spaces/ABCDEF/messages?key=abcdefgh&token=abcdefgh"
 serverHost: "https://my-gocd-server-url.com"
 ```
-
-`webhookUrl` - [Google Chat](https://chat.google.com) Incoming Webhook URL
 
 `serverHost` - FQDN of the GoCD Server. All links on the Chat channel will be relative to this host
 
@@ -27,7 +24,11 @@ Or you can set environment variables by checking [this doc](https://docs.gocd.or
 ```
 set.GCHAT_NOTIFIER_CONF_PATH=/usr/local/some/path/gchat_notif.conf
 ```
-* Finally restart the GoCD server so that the plugin is loaded and can send build notifications to [Google Chat](https://chat.google.com)
+* Restart the GoCD server so that the plugin is loaded
+
+* Finally, add the Google Chat webhook URL in GoCD UI: `Admin > Plugins > Cogwheel next to Google Chat Build Notifier`. 
+
+* The plugin can send build notifications to [Google Chat](https://chat.google.com)
 
 ## Setup and Configuration for GoCD on Kubernetes Using Helm
 

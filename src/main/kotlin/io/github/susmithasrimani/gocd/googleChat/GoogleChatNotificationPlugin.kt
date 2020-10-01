@@ -27,12 +27,10 @@ class GoogleChatNotificationPlugin() : GoPlugin {
     private val confPathEnvVarName = "GCHAT_NOTIFIER_CONF_PATH"
     private var accessor: GoApplicationAccessor? = null
     private val logger: Logger? = Logger.getLoggerFor(this.javaClass)
-    private var webhookURL: String = ""
     private var serverHost: String = ""
 
-    constructor (accessor: GoApplicationAccessor, webhookURL: String, serverHost: String) : this() {
+    constructor (accessor: GoApplicationAccessor, serverHost: String) : this() {
         this.accessor = accessor
-        this.webhookURL = webhookURL
         this.serverHost = serverHost
     }
 
@@ -44,9 +42,8 @@ class GoogleChatNotificationPlugin() : GoPlugin {
 
         val config = ConfigFactory.parseFile(file)
 
-        webhookURL = config.getString("webhookUrl")
         serverHost = config.getString("serverHost")
-        logger?.info("Plugin loaded with webhook: $webhookURL and server host: $serverHost")
+        logger?.info("Plugin loaded with server host: $serverHost")
 
         logger?.info("Plugin loaded")
     }
